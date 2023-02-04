@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\CDetour\asm\asm.c">
+      <Filter>detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CDetour\libudis86\decode.c">
+      <Filter>detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CDetour\detours.cpp">
+      <Filter>detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CDetour\libudis86\itab.c">
+      <Filter>detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CDetour\libudis86\udis86.c">
+      <Filter>detour</Filter>
+    </ClCompile>
+    <ClCompile Include="share_obj.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="dllapi.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_api.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="h_export.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="meta_api.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk_util.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dlldef.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="enginedef.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="info_name.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="share_obj.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="signatures.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="detour">
+      <UniqueIdentifier>{a032f7f7-f27b-40af-a5e4-8434f81cf050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{d1201198-c8f9-4863-af17-3a6cbd85f204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{1fbd1c5c-35a1-47c7-8a49-d63db1bf86ce}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

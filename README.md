@@ -1,7 +1,7 @@
 # `LagCompensator`: Plugin to add lag compensator for Sven Co-op <img align="right" src="./img/logo.png" width="140" height="140" alt="LagCompensator" />
 
 [![License: GPL v3](https://img.shields.io/github/license/DrAbcOfficial/lagcompensator)](https://www.gnu.org/licenses/gpl-3.0)
-[![Build](https://img.shields.io/github/workflow/status/DrAbcOfficial/lagcompensator/Build)](https://github.com/DrAbcOfficial/lagcompensator/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/DrAbcOfficial/lagcompensator/build.yml?branch=main)](https://github.com/DrAbcOfficial/lagcompensator/actions)
 [![Release](https://img.shields.io/github/v/release/DrAbcOfficial/lagcompensator)](https://github.com/DrAbcOfficial/lagcompensator/releases)
 [![Download](https://img.shields.io/github/downloads/DrAbcOfficial/lagcompensator/total)](https://github.com/DrAbcOfficial/lagcompensator/releases)
 [![Commit](https://img.shields.io/github/last-commit/DrAbcOfficial/lagcompensator)](https://github.com/DrAbcOfficial/lagcompensator)

@@ -169,7 +169,7 @@ void CmdEnd(const edict_t* player) {
 			if (ent->v.deadflag > 0)
 				continue;
 			CEntityObject* obj = GetGameObject(i);
-			if (obj != nullptr) 
+			if (obj != nullptr && obj->aryLagInfo.size() > 0)
 				SetEntityLagState(ent, &obj->pLastInfo);
 		}
 		SET_META_RESULT(MRES_HANDLED);

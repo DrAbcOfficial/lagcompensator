@@ -45,6 +45,7 @@
 #include "dlldef.h"
 
 #define CALL_ANGELSCRIPT(pfn, ...) if (ASEXT_CallHook){(*ASEXT_CallHook)(g_AngelHook.pfn, 0, __VA_ARGS__);}
+cvar_t* g_pCVarUnlag = nullptr;
 
 bool g_HookedFlag = false;
 void ServerActivate (edict_t* pEdictList, int edictCount, int clientMax) {
@@ -53,12 +54,13 @@ void ServerActivate (edict_t* pEdictList, int edictCount, int clientMax) {
 		return;
 	}
 	g_HookedFlag = true;
+	g_pCVarUnlag = CVAR_GET_POINTER("sv_unlag");
 	ClearGameObject();
 	SET_META_RESULT(MRES_HANDLED);
 }
 int AllowLagCompensation() {
 	SET_META_RESULT(MRES_SUPERCEDE);
-	return CVAR_GET_FLOAT("sv_unlag") > 0 ? 1 : 0;
+	return g_pCVarUnlag->value > 0 ? 1 : 0;
 }
 void EndFrame() {
 //大概有400ms
@@ -120,7 +122,7 @@ void SetEntityLagState(edict_t* ent, entitylaginfo_t* lag) {
 	vars->sequence = lag->Sequence;
 }
 void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int random_seed) {
-	if (player != nullptr && CVAR_GET_FLOAT("sv_unlag") > 0) {
+	if (player != nullptr && g_pCVarUnlag->value > 0) {
 		int ping, loss;
 		g_engfuncs.pfnGetPlayerStats(player, &ping, &loss);
 		float flRecallTime = g_engfuncs.pfnTime() - ((float)ping / 1000.0f);
@@ -157,7 +159,7 @@ void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int r
 	SET_META_RESULT(MRES_IGNORED);
 }
 void CmdEnd(const edict_t* player) {
-	if (player != nullptr && CVAR_GET_FLOAT("sv_unlag") > 0) {
+	if (player != nullptr && g_pCVarUnlag->value > 0) {
 		for (int i = 1; i < gpGlobals->maxEntities; i++) {
 			edict_t* ent = INDEXENT(i);
 			if (ent == nullptr)

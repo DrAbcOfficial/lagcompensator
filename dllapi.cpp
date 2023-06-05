@@ -49,13 +49,13 @@ cvar_t* g_pCVarUnlag = nullptr;
 
 bool g_HookedFlag = false;
 void ServerActivate (edict_t* pEdictList, int edictCount, int clientMax) {
+	ClearGameObject();
 	if (g_HookedFlag) {
 		SET_META_RESULT(MRES_IGNORED);
 		return;
 	}
 	g_HookedFlag = true;
 	g_pCVarUnlag = CVAR_GET_POINTER("sv_unlag");
-	ClearGameObject();
 	SET_META_RESULT(MRES_HANDLED);
 }
 int AllowLagCompensation() {

@@ -5,7 +5,9 @@
 
 std::vector<CEntityObject*> g_EntityObjs;
 CEntityObject* GetGameObject(int index) {
-	return g_EntityObjs[index];
+	if(index < g_EntityObjs.size())
+		return g_EntityObjs[index];
+	return nullptr;
 }
 void ClearGameObject() {
 	for (size_t i = 0; i < g_EntityObjs.size(); i++) {

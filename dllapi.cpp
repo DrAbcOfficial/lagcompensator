@@ -49,7 +49,7 @@ cvar_t* g_pCVarUnlag = nullptr;
 
 bool g_HookedFlag = false;
 void ServerActivate (edict_t* pEdictList, int edictCount, int clientMax) {
-	ClearGameObject();
+	CEntityObject::ClearGameObject();
 	if (g_HookedFlag) {
 		SET_META_RESULT(MRES_IGNORED);
 		return;
@@ -71,41 +71,27 @@ void EndFrame() {
 		edict_t* ent = INDEXENT(i);
 		if (ent == nullptr)
 			continue;
-		entvars_t* vars = VARS(ent);
-		if ((vars->flags & FL_MONSTER) == 0)
+		CEntityObject* obj = CEntityObject::GetGameObject(i);
+		//entity freed?
+		if (ent->free){
+			CEntityObject::RemoveGameObject(i);
 			continue;
-		const char* className = STRING(vars->classname);
-		if (!strncmp(className, "monster_", 8)) {
-			CEntityObject* obj = GetGameObject(i);
-			if (obj != nullptr) {
-				//entity freed?
-				if (ent->free){
-					RemoveGameObject(i);
-					continue;
-				}
-			}
-			else {
-				if (ent->free)
-					continue;
-				obj = CreateGameObject(i);
-			}
-			if(obj != nullptr){
-				entitylaginfo_t* lagInfo = new entitylaginfo_t();
-				lagInfo->Angles = vars->angles;
-				lagInfo->AnimTime = vars->animtime;
-				lagInfo->Frame = vars->frame;
-				lagInfo->FrameRate = vars->framerate;
-				lagInfo->GaitSequence = vars->gaitsequence;
-				lagInfo->Origin = vars->origin;
-				lagInfo->Sequence = vars->sequence;
-				obj->aryLagInfo.push_back(lagInfo);
-				obj->aryLagInfoRecordTime.push_back(g_engfuncs.pfnTime());
-				if (obj->aryLagInfo.size() > MAX_RECORD) {
-					delete obj->aryLagInfo.front();
-					obj->aryLagInfo.erase(obj->aryLagInfo.begin());
-					obj->aryLagInfoRecordTime.erase(obj->aryLagInfoRecordTime.begin());
-				}
-			}
+		}
+		entvars_t* vars = VARS(ent);
+		if ((vars->deadflag > 0) || (vars->movetype = MOVETYPE_NONE) || (vars->solid == SOLID_BSP))
+			continue;
+		std::shared_ptr<entityinfo_t> lagInfo = std::make_shared<entityinfo_t>();
+		lagInfo->info.Angles = vars->angles;
+		lagInfo->info.AnimTime = vars->animtime;
+		lagInfo->info.Frame = vars->frame;
+		lagInfo->info.FrameRate = vars->framerate;
+		lagInfo->info.GaitSequence = vars->gaitsequence;
+		lagInfo->info.Origin = vars->origin;
+		lagInfo->info.Sequence = vars->sequence;
+		lagInfo->time = g_engfuncs.pfnTime();
+		obj->aryLagInfo.push_back(lagInfo);
+		if (obj->aryLagInfo.size() > MAX_RECORD) {
+			obj->aryLagInfo.pop_front();
 		}
 	}
 	SET_META_RESULT(MRES_HANDLED);
@@ -126,29 +112,28 @@ void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int r
 		int ping, loss;
 		g_engfuncs.pfnGetPlayerStats(player, &ping, &loss);
 		float flRecallTime = g_engfuncs.pfnTime() - ((float)ping / 1000.0f);
-		for (int i = 1; i < gpGlobals->maxEntities; i++) {
+		for (int i = 34; i < gpGlobals->maxEntities; i++) {
 			edict_t* ent = INDEXENT(i);
 			if (ent == nullptr)
 				continue;
-			if (ent->free || ent == player)
+			if (ent->free)
 				continue;
-			//dead
-			if (ent->v.deadflag > 0)
+			if ((ent->v.deadflag > 0) || (ent->v.movetype = MOVETYPE_NONE) || (ent->v.solid == SOLID_BSP))
 				continue;
-			CEntityObject* obj = GetGameObject(i);
+			CEntityObject* obj = CEntityObject::GetGameObject(i);
 			if (obj != nullptr && obj->aryLagInfo.size() > 0) {
 				entvars_t* vars = VARS(ent);
-				obj->pLastInfo.Angles = vars->angles;
-				obj->pLastInfo.AnimTime = vars->animtime;
-				obj->pLastInfo.Frame = vars->frame;
-				obj->pLastInfo.FrameRate = vars->framerate;
-				obj->pLastInfo.GaitSequence = vars->gaitsequence;
-				obj->pLastInfo.Origin = vars->origin;
-				obj->pLastInfo.Sequence = vars->sequence;
-				for (int index = obj->aryLagInfoRecordTime.size() - 1; index >= 0; index--) {
-					if (obj->aryLagInfoRecordTime[index] <= flRecallTime) {
-						SetEntityLagState(ent, obj->aryLagInfo[index]);
-						break;
+				auto pLastInfo = CEntityObject::GetLastLagInfo(i);
+				pLastInfo->Angles = vars->angles;
+				pLastInfo->AnimTime = vars->animtime;
+				pLastInfo->Frame = vars->frame;
+				pLastInfo->FrameRate = vars->framerate;
+				pLastInfo->GaitSequence = vars->gaitsequence;
+				pLastInfo->Origin = vars->origin;
+				pLastInfo->Sequence = vars->sequence;
+				for (auto iter = obj->aryLagInfo.rbegin(); iter != obj->aryLagInfo.rend(); iter++) {
+					if ((*iter)->time <= flRecallTime) {
+						SetEntityLagState(ent, &(*iter)->info);
 					}
 				}
 			}
@@ -160,26 +145,29 @@ void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int r
 }
 void CmdEnd(const edict_t* player) {
 	if (player != nullptr && g_pCVarUnlag->value > 0) {
-		for (int i = 1; i < gpGlobals->maxEntities; i++) {
+		for (int i = 34; i < gpGlobals->maxEntities; i++) {
 			edict_t* ent = INDEXENT(i);
 			if (ent == nullptr)
 				continue;
-			if (ent->free || ent == player)
+			if (ent->free)
 				continue;
-			if (ent->v.deadflag > 0)
+			if ((ent->v.deadflag > 0) || (ent->v.movetype = MOVETYPE_NONE) || (ent->v.solid == SOLID_BSP))
 				continue;
-			CEntityObject* obj = GetGameObject(i);
+			CEntityObject* obj = CEntityObject::GetGameObject(i);
 			if (obj != nullptr && obj->aryLagInfo.size() > 0)
-				SetEntityLagState(ent, &obj->pLastInfo);
+				SetEntityLagState(ent, CEntityObject::GetLastLagInfo(i));
 		}
 		SET_META_RESULT(MRES_HANDLED);
 		return;
 	}
 	SET_META_RESULT(MRES_IGNORED);
 }
+void GameInit() {
+	CEntityObject::InitGameObject();
+}
 
 static DLL_FUNCTIONS gFunctionTable = {
-	NULL,					// pfnGameInit
+	GameInit,					// pfnGameInit
 	NULL,					// pfnSpawn
 	NULL,					// pfnThink
 	NULL,					// pfnUse

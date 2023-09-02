@@ -1,29 +1,29 @@
 #include <extdll.h>
 #include <meta_api.h>
-#include <vector>
 #include "share_obj.h"
 
-std::vector<CEntityObject*> g_EntityObjs;
-CEntityObject* GetGameObject(int index) {
-	if(index < g_EntityObjs.size())
-		return g_EntityObjs[index];
+CEntityObject* g_EntityObjs;
+entitylaginfo_t* g_LastInfos;
+
+void CEntityObject::InitGameObject() {
+	g_EntityObjs = new CEntityObject[gpGlobals->maxEntities];
+	g_LastInfos = new entitylaginfo_t[gpGlobals->maxEntities];
+}
+void CEntityObject::ClearGameObject() {
+	for (int i = 0; i < gpGlobals->maxEntities; i++) {
+		g_EntityObjs[i].Clean();
+		g_LastInfos[i].Clear();
+	}
+}
+void CEntityObject::RemoveGameObject(int index) {
+	g_EntityObjs[index].Clean();
+	g_LastInfos[index].Clear();
+}
+CEntityObject* CEntityObject::GetGameObject(int index) {
+	if (index < gpGlobals->maxEntities)
+		return &g_EntityObjs[index];
 	return nullptr;
 }
-void ClearGameObject() {
-	for (size_t i = 0; i < g_EntityObjs.size(); i++) {
-		g_EntityObjs[i]->Clean();
-		delete g_EntityObjs[i];
-		g_EntityObjs[i] = nullptr;
-	}
-	g_EntityObjs.resize(gpGlobals->maxEntities);
-}
-void RemoveGameObject(int index) {
-	g_EntityObjs[index]->Clean();
-	delete g_EntityObjs[index];
-	g_EntityObjs[index] = nullptr;
-}
-CEntityObject* CreateGameObject(int index) {
-	CEntityObject* obj = new CEntityObject();
-	g_EntityObjs[index] = obj;
-	return obj;
+entitylaginfo_t* CEntityObject::GetLastLagInfo(int index){
+	return &g_LastInfos[index];
 }

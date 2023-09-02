@@ -1,4 +1,6 @@
 #pragma once
+#include <list>
+#include <memory>
 typedef struct entitylaginfo_s {
 	Vector Origin;
 	Vector Angles;
@@ -7,21 +9,31 @@ typedef struct entitylaginfo_s {
 	float Frame;
 	float FrameRate;
 	float AnimTime;
+
+	void Clear() {
+		Origin = Vector(0, 0, 0);
+		Angles = Vector(0, 0, 0);
+		GaitSequence = 0;
+		Sequence = 0;
+		Frame = 0;
+		FrameRate = 0;
+		AnimTime = 0;
+	}
 }entitylaginfo_t;
+
+typedef struct entityinfo_s {
+	entitylaginfo_t info;
+	float time;
+}entityinfo_t;
 class CEntityObject {
 public:
-	entitylaginfo_t pLastInfo;
-	std::vector <entitylaginfo_t*> aryLagInfo;
-	std::vector <float> aryLagInfoRecordTime;
-	inline void Clean() {
-		aryLagInfoRecordTime.clear();
-		for (size_t i = 0; i < aryLagInfo.size(); i++) {
-			delete aryLagInfo[i];
-		}
+	std::list<std::shared_ptr<entityinfo_t>> aryLagInfo;
+	void Clean() {
 		aryLagInfo.clear();
 	}
+	static void InitGameObject();
+	static void ClearGameObject();
+	static void RemoveGameObject(int index);
+	static CEntityObject* GetGameObject(int index);
+	static entitylaginfo_t* GetLastLagInfo(int index);
 };
-CEntityObject* GetGameObject(int index);
-void ClearGameObject();
-void RemoveGameObject(int index);
-CEntityObject* CreateGameObject(int index);
